@@ -5,12 +5,12 @@ with open("README.md") as fh:
     long_description = fh.read()
 
 requirements = [
-    "scipy==1.3.1",
-    "biopython==1.74",
-    "numpy>=1.13.3, <=1.15.4",
-    'llvmlite==0.30.0',
-    "numba==0.46.0",
-    "matplotlib==3.0.0",
+    "scipy",
+    "biopython",
+    "numpy",
+    'llvmlite',
+    "numba",
+    "matplotlib",
     "requests>=2.22.0",
 ]
 
