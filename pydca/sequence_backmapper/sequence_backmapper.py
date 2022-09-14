@@ -1,7 +1,7 @@
 from pydca.fasta_reader import fasta_reader
 from . import scoring_matrix
 from Bio import pairwise2
-from Bio.SubsMat.MatrixInfo import blosum62
+from Bio.Align import substitution_matrices
 import logging
 import os
 
@@ -18,6 +18,7 @@ Author: Mehari B. Zerihun
 """
 
 logger = logging.getLogger(__name__)
+blosum62 = substitution_matrices.load("BLOSUM62")
 
 class SequenceBackmapper:
     """Defines a sequence backmapper class. Instances of SequenceBackmapper perform

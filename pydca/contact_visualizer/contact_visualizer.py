@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import Bio.PDB as biopdb
 import Bio.SeqIO
-from Bio.SubsMat.MatrixInfo import blosum62
+from Bio.Align import substitution_matrices
 from Bio import pairwise2
 from argparse import ArgumentParser
 import logging
@@ -12,6 +12,7 @@ import itertools
 import requests 
 
 logger = logging.getLogger(__name__)
+blosum62 = substitution_matrices.load("BLOSUM62")
 
 STANDARD_RESIDUES = {
     'RNA' : ('A', 'C', 'G', 'U'),
