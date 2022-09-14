@@ -87,6 +87,7 @@ class PlmDCA:
         self.freeFieldsAndCouplings = self.__plmdca.freeFieldsAndCouplings
         #self.freeFieldsAndCouplings.argtypes = (ctypes.POINTER(ctypes.c_float),) 
         self.freeFieldsAndCouplings.restype = None 
+        self.__fields_and_couplings_all = None
         log_message="""Created plmDCA instance with:
             biomolecule: {}
             MSA sequence length: {}
@@ -102,6 +103,24 @@ class PlmDCA:
         )
         logger.info(log_message)
         return None
+
+    @property
+    def fields_and_couplings(self):
+        if self.__fields_and_couplings_all is None:
+            self.__fields_and_couplings_all = self.get_fields_and_couplings_from_backend()
+        return self.__fields_and_couplings_all
+    
+    @fields_and_couplings.setter
+    def fields_and_couplings(self,value):
+        assert value is np.array
+        q = self.__num_site_states
+        L = self.__seqs_len 
+        assert len(value) == L*(L-1)//2*q*q+L*q
+        self.__fields_and_couplings_all = value
+
+    @fields_and_couplings.deleter
+    def fields_and_couplings(self):
+        self.__fields_and_couplings_all = None
 
 
     @property
@@ -341,6 +360,9 @@ class PlmDCA:
         couplings_ij = couplings_ij -  avx - avy + av
         return couplings_ij 
 
+    def compute_fields_and_couplings(self):
+        self.fields_and_couplings = self.get_fields_and_couplings_from_backend()
+
 
     def compute_params(self, seqbackmapper=None, ranked_by = None, linear_dist = None, num_site_pairs =None):
         """Computes fields and couplings with the couplings ranked by DCA score.
@@ -378,8 +400,8 @@ class PlmDCA:
         if ranked_by == 'DI': dca_scores = self.compute_sorted_DI(seqbackmapper=seqbackmapper)
         if ranked_by == 'DI_APC': dca_scores = self.compute_sorted_DI_APC(seqbackmapper=seqbackmapper)
 
-        fields = self.get_fields_no_gap_state(self.__fields_and_couplings_all)
-        couplings = self.get_couplings_no_gap_state(self.__fields_and_couplings_all)
+        fields = self.get_fields_no_gap_state(self.fields_and_couplings)
+        couplings = self.get_couplings_no_gap_state(self.fields_and_couplings)
         
         qm1 = self.__num_site_states - 1 
         L = self.__seqs_len
@@ -452,10 +474,7 @@ class PlmDCA:
         dca_scores_not_apc = list()
         L = self.__seqs_len
         q = self.__num_site_states
-        fields_and_couplings = self.get_fields_and_couplings_from_backend()
-        # add attribute fields and couplings
-        self.__fields_and_couplings_all = fields_and_couplings
-        couplings = self.get_couplings_no_gap_state(fields_and_couplings)
+        couplings = self.get_couplings_no_gap_state(self.fields_and_couplings)
         qm1 = q - 1
         logger.info('\n\tComputing non-APC sorted DCA score') 
         for i in range(self.__seqs_len -1):
@@ -703,10 +722,7 @@ class PlmDCA:
                 (q, q), we use Pdir[:q-1, :q-1] when computing the direct information.
         """
 
-        fields_and_couplings = self.get_fields_and_couplings_from_backend()
-        #add attribute to capture the fields and couplings obtained from backend
-        self.__fields_and_couplings_all = fields_and_couplings
-        couplings = self.get_couplings_no_gap_state(fields_and_couplings)
+        couplings = self.get_couplings_no_gap_state(self.fields_and_couplings)
         reg_fi = self.get_reg_single_site_freqs()
         two_site_model_fields = self.compute_two_site_model_fields(couplings)
         logger.info('\n\tComputing direct information')
