@@ -122,6 +122,8 @@ class PlmDCA:
     def fields_and_couplings(self):
         self.__fields_and_couplings_all = None
 
+    def reset_fields_and_couplings(self):
+        self.__fields_and_couplings_all = self.get_fields_and_couplings_from_backend()
 
     @property
     def biomolecule(self):
@@ -360,9 +362,24 @@ class PlmDCA:
         couplings_ij = couplings_ij -  avx - avy + av
         return couplings_ij 
 
-    def compute_fields_and_couplings(self):
-        self.fields_and_couplings = self.get_fields_and_couplings_from_backend()
-
+    def get_potts_model(self):
+        """
+        Returns the Potts model fields and couplings as a dictionary
+        ----------
+        """
+        q = self.__num_site_states
+        L = self.__seqs_len
+        fields=self.fields_and_couplings[:L*q].reshape(L,q)
+        couplings=self.fields_and_couplings[L*q:].reshape(L*(L-1)//2,q,q)
+        new_couplings = np.zeros([L,L,q,q])
+        k=0
+        for i in np.arange(0,L):
+            for j in np.arange(i+1,L):
+                new_couplings[i,j]=couplings[k]
+                new_couplings[j,i]=couplings[k]
+                #print(k,(plmdca_inst.map_index_couplings(i,j,0,0)-plmdca_inst.map_index_couplings(0,0,0,0))/(q*q))
+                k+=1
+        return {'h':fields,'J':new_couplings,'N':L,'q':q}
 
     def compute_params(self, seqbackmapper=None, ranked_by = None, linear_dist = None, num_site_pairs =None):
         """Computes fields and couplings with the couplings ranked by DCA score.
