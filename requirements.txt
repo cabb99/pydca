@@ -5,4 +5,4 @@ llvmlite
 numba
 matplotlib
 requests>=2.22.0
-importlib_metadata; python_version < 3.9
+importlib_metadata; python_version < '3.9'
