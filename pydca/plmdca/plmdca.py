@@ -1,5 +1,5 @@
 #from pydca.sequence_backmapper.sequence_backmapper import SequenceBackmapper
-from pydca.fasta_reader.fasta_reader import get_alignment_from_fasta_file
+from pydca.fasta_reader.fasta_reader import get_alignment_from_alignment_file
 from pydca.fasta_reader.fasta_reader import get_alignment_int_form
 from . import msa_numerics
 import ctypes 
@@ -46,7 +46,7 @@ class PlmDCA:
 
     def __init__(self, msa_file, biomolecule, seqid = None, lambda_h=None, 
             lambda_J = None, max_iterations = None, num_threads = None, 
-            verbose = False):
+            verbose = False, msa_file_format='fasta'):
         """Initilizes plmdca instances
         """
         self.__biomolecule = biomolecule.strip().upper()
@@ -54,6 +54,7 @@ class PlmDCA:
             logger.error('\n\tInvalid biomolecule type {}'.format(self.__biomolecule))
             raise PlmDCAException
         self.__msa_file = msa_file
+        self.__msa_file_format = msa_file_format
         self.__biomolecule_int = 1 if self.__biomolecule == 'PROTEIN' else 2
         self.__num_site_states = 21 if self.__biomolecule== 'PROTEIN' else 5
         self.__num_seqs, self.__seqs_len = self._get_num_and_len_of_seqs()
@@ -195,7 +196,7 @@ class PlmDCA:
                 A tuple of the number and length of sequences as read from 
                 the MSA file
         """
-        msa_data = get_alignment_from_fasta_file(self.__msa_file)
+        msa_data = get_alignment_from_alignment_file(self.__msa_file, self.__msa_file_format)
         num_seqs = len(msa_data)
         seqs_len = len(msa_data[0])
         return num_seqs, seqs_len

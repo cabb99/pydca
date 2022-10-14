@@ -1,14 +1,14 @@
 import logging
 from Bio import AlignIO
 
-"""Reads alignment data from FASTA files, can convert residue representation in
+"""Reads alignment data from Alignment files, can convert residue representation in
 in the sequences for char to int or vice versa.
 
 Author: Mehari B. Zerihun
 """
 
 __all__ = [
-    'get_alignment_from_fasta_file',
+    'get_alignment_from_alignment_file',
     'get_alignment_int_form',
     'get_alignment_char_form',
     'sequences_to_char_form',
@@ -76,13 +76,15 @@ def res_to_char(biomolecule):
     return RES_TO_CHAR
 
 
-def get_alignment_from_fasta_file(file_name):
-    """Read sequences from FASTA file using Bio.AlignIO.read()
+def get_alignment_from_alignment_file(file_name, msa_file_format='fasta'):
+    """Read sequences from Alignment file using Bio.AlignIO.read()
 
     Parameters
     ----------
         file_name : str
-            Path to FASTA formatted file.
+            Path to Alignment formatted file.
+        msa_file_format : str
+            Format of the alignment (any AlignIO format)
 
     Returns
     -------
@@ -91,7 +93,7 @@ def get_alignment_from_fasta_file(file_name):
     """
     alignment = []
     try:
-        record_iterator = AlignIO.read(file_name, 'fasta')
+        record_iterator = AlignIO.read(file_name, msa_file_format)
         #biopython just reads the records if there are tags (>some key).
         #It doesn't know if the file is really a biological sequence or not
     except Exception as expt:
@@ -182,7 +184,7 @@ def get_alignment_int_form(file_name, biomolecule='protein'):
         a list of alignments, each sequence in a list of integers.
     """
 
-    alignment = get_alignment_from_fasta_file(file_name)
+    alignment = get_alignment_from_alignment_file(file_name)
     alignment_int_form = alignment_letter2int(alignment, biomolecule)
 
     return alignment_int_form

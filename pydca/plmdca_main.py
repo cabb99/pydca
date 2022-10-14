@@ -1,6 +1,6 @@
 from pydca.plmdca import plmdca 
 from pydca.sequence_backmapper.sequence_backmapper import SequenceBackmapper
-from pydca.fasta_reader.fasta_reader import get_alignment_from_fasta_file
+from pydca.fasta_reader.fasta_reader import get_alignment_from_alignment_file
 from pydca.dca_utilities import dca_utilities
 from argparse import ArgumentParser
 import logging

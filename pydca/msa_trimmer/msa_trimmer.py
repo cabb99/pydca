@@ -15,7 +15,7 @@ class MSATrimmerException(Exception):
 
 class MSATrimmer:
 
-    def __init__(self, msa_file, biomolecule=None,max_gap=None, refseq_file=None):
+    def __init__(self, msa_file, biomolecule=None,max_gap=None, refseq_file=None, msa_file_format='fasta'):
         """
         Parameters
         ----------
@@ -36,7 +36,7 @@ class MSATrimmer:
             self.__biomolecule = biomolecule.strip().upper()
         else:
             self.__biomolecule = biomolecule
-        self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta'))
+        self.__alignment_data = list(AlignIO.read(self.__msa_file, msa_file_format))
 
         logger.info('\n\tMSA file: {0}'
             '\n\tReference sequence file: {1}'

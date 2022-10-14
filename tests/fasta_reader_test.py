@@ -16,11 +16,11 @@ class TestCase(unittest.TestCase):
 
 
     def test_get_alignment_from_fasta_file(self):
-        rna_seqs = fasta_reader.get_alignment_from_fasta_file(
+        rna_seqs = fasta_reader.get_alignment_from_alignment_file(
             self.__rna_msa_file,
         )
         self.assertIsNotNone(rna_seqs)
-        protein_seqs = fasta_reader.get_alignment_from_fasta_file(
+        protein_seqs = fasta_reader.get_alignment_from_alignment_file(
             self.__protein_msa_file,
         )
         self.assertIsNotNone(protein_seqs)
