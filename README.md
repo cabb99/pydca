@@ -9,9 +9,9 @@
 
 
 # Installing
-To install the current version of `pydca` from PyPI, run on the command line
+To install this version of `pydca`, clone the repository, enter the directory and run on the command line
 ```bash
-$ pip install pydca
+$ pip install -e .
 ```
 or you can use the `install.sh` bash script as 
 ```bash 
