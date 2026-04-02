@@ -36,7 +36,10 @@ class MSATrimmer:
             self.__biomolecule = biomolecule.strip().upper()
         else:
             self.__biomolecule = biomolecule
-        self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta'))
+        try:
+            self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta-pearson'))
+        except ValueError:
+            self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta'))
 
         logger.info('\n\tMSA file: {0}'
             '\n\tReference sequence file: {1}'

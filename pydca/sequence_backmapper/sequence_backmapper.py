@@ -1,9 +1,63 @@
 from pydca.fasta_reader import fasta_reader
 from . import scoring_matrix
-from Bio import pairwise2
-from Bio.SubsMat.MatrixInfo import blosum62
+try:
+    from Bio import pairwise2
+    from Bio.SubsMat.MatrixInfo import blosum62
+    _USE_PAIRWISE2 = True
+except ImportError:
+    from Bio.Align import PairwiseAligner, substitution_matrices
+    blosum62 = substitution_matrices.load("BLOSUM62")
+    _USE_PAIRWISE2 = False
 import logging
 import os
+
+
+def _get_scoring_params(biomolecule):
+    """Return (scoring_matrix, gap_open, gap_extend) for RNA or protein."""
+    if biomolecule == 'RNA':
+        if _USE_PAIRWISE2:
+            return scoring_matrix.NUC44, -8, 0
+        return scoring_matrix.NUC44_ARRAY, -8, 0
+    elif biomolecule == 'PROTEIN':
+        return blosum62, -10, -1
+    raise ValueError("Unknown biomolecule type: {!r}".format(biomolecule))
+
+
+def local_align(ref_seq, other_seq, biomolecule, score_only=False):
+    """Pairwise local alignment.
+
+    Returns the alignment score (float) if score_only is True.
+    Otherwise returns a list of (aligned_ref, aligned_other, score, start, end)
+    tuples matching the pairwise2 format that downstream code expects.
+    """
+    scoring_mat, gap_open, gap_extend = _get_scoring_params(biomolecule)
+
+    if _USE_PAIRWISE2:
+        return pairwise2.align.localds(
+            ref_seq, other_seq, scoring_mat,
+            gap_open, gap_extend, score_only=score_only,
+        )
+
+    aligner = PairwiseAligner()
+    aligner.mode = 'local'
+    aligner.substitution_matrix = scoring_mat
+    aligner.open_gap_score = gap_open
+    aligner.extend_gap_score = gap_extend
+
+    if score_only:
+        return aligner.score(ref_seq, other_seq)
+
+    results = []
+    for aln in aligner.align(ref_seq, other_seq):
+        #Complete gaps in the alignment
+        aligned_ref = aln[0]       
+        aligned_other = aln[1]     
+        ref_start = int(aln.aligned[0][0][0])   
+        ref_end = int(aln.aligned[0][-1][1])    
+        full_ref = ref_seq[:ref_start] + aligned_ref + ref_seq[ref_end:]
+        full_other = '-' * ref_start + aligned_other + '-' * (len(ref_seq) - ref_end)
+        results.append((full_ref, full_other, aln.score, ref_start, ref_start + len(aligned_ref)))
+    return results
 
 """Performs sequence back-mapping of a reference sequence to an MSA sequeces.
 The back-mapping is done by searching the best matching sequence to the reference.
@@ -203,29 +257,7 @@ class SequenceBackmapper:
                 A tuple of pairwise aligned sequences, alignment score and
                 start and end indices of alignment
         """
-        if self.__biomolecule == 'RNA':
-            scoring_mat = scoring_matrix.NUC44
-            GAP_OPEN_PEN = -8
-            GAP_EXTEND_PEN = 0
-        elif self.__biomolecule == 'PROTEIN':
-            scoring_mat = blosum62
-            GAP_OPEN_PEN = -10
-            GAP_EXTEND_PEN = -1
-        else:
-            logger.error('\n\tUnknown biomolecule type.'
-                ' Cannot figure out the scoring matrix.')
-            raise ValueError
-
-        alignments = pairwise2.align.localds(
-            ref_seq,
-            other_seq,
-            scoring_mat,
-            GAP_OPEN_PEN,
-            GAP_EXTEND_PEN,
-            score_only = score_only,
-        )
-
-        return alignments
+        return local_align(ref_seq, other_seq, self.__biomolecule, score_only=score_only)
 
 
     def find_matching_seqs_from_alignment(self):

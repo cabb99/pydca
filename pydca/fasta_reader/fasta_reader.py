@@ -91,7 +91,10 @@ def get_alignment_from_fasta_file(file_name):
     """
     alignment = []
     try:
-        record_iterator = AlignIO.read(file_name, 'fasta')
+        try:
+            record_iterator = AlignIO.read(file_name, 'fasta-pearson')
+        except ValueError:
+            record_iterator = AlignIO.read(file_name, 'fasta')
         #biopython just reads the records if there are tags (>some key).
         #It doesn't know if the file is really a biological sequence or not
     except Exception as expt:
