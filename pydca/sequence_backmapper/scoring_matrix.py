@@ -91,3 +91,9 @@ NUCLEOTIDE_AMBIGUOUS_SCORING = {
 }
 
 NUC44 = NUCLEOTIDE_NUCLEOTIDE_SCORING
+
+try:
+    from Bio.Align import substitution_matrices as _submat
+    NUC44_ARRAY = _submat.Array(data=NUC44)
+except ImportError:
+    NUC44_ARRAY = None

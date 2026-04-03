@@ -1,18 +1,22 @@
 import matplotlib.pyplot as plt
 import Bio.PDB as biopdb
 import Bio.SeqIO
-from Bio.Align import substitution_matrices
-from Bio import pairwise2
+try:
+    from Bio.SubsMat.MatrixInfo import blosum62
+    from Bio import pairwise2
+except ImportError:
+    from Bio.Align import substitution_matrices
+    blosum62 = substitution_matrices.load("BLOSUM62")
 from argparse import ArgumentParser
 import logging
 from ..sequence_backmapper import scoring_matrix
+from ..sequence_backmapper.sequence_backmapper import local_align
 import os
 from collections import OrderedDict
 import itertools
 import requests 
 
 logger = logging.getLogger(__name__)
-blosum62 = substitution_matrices.load("BLOSUM62")
 
 STANDARD_RESIDUES = {
     'RNA' : ('A', 'C', 'G', 'U'),
@@ -1203,22 +1207,7 @@ class DCAVisualizer:
             self.__pdb_chain_id, pdb_seq)
         )
 
-        if self.__biomolecule == 'PROTEIN':
-            scoring_mat = blosum62
-            GAP_OPEN_PEN = -10
-            GAP_EXTEND_PEN = -1
-        if self.__biomolecule == 'RNA':
-            scoring_mat = scoring_matrix.NUC44
-            GAP_OPEN_PEN = -8
-            GAP_EXTEND_PEN = 0
-        alignment = pairwise2.align.localds(
-            ref_seq,
-            pdb_seq,
-            scoring_mat,
-            GAP_OPEN_PEN,
-            GAP_EXTEND_PEN,
-            score_only=False,
-        )
+        alignment = local_align(ref_seq, pdb_seq, self.__biomolecule)
         seq_ref_aligned = alignment[0][0]
         seq_pdb_aligned = alignment[0][1]
         alignment_starts_at = alignment[0][3]

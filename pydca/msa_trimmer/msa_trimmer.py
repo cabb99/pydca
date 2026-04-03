@@ -25,6 +25,8 @@ class MSATrimmer:
                 Path to the FASTA formatted MSA file
             biomolecule : str
                 Type of biomolecule (protein or RNA)
+            msa_file_format : str
+                Format of the alignment (any AlignIO format, e.g. 'fasta', 'stockholm').
         """
         self.__msa_file = msa_file
         self.__refseq_file = refseq_file
@@ -36,7 +38,13 @@ class MSATrimmer:
             self.__biomolecule = biomolecule.strip().upper()
         else:
             self.__biomolecule = biomolecule
-        self.__alignment_data = list(AlignIO.read(self.__msa_file, msa_file_format))
+        if msa_file_format == 'fasta':
+            try:
+                self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta-pearson'))
+            except ValueError:
+                self.__alignment_data = list(AlignIO.read(self.__msa_file, 'fasta'))
+        else:
+            self.__alignment_data = list(AlignIO.read(self.__msa_file, msa_file_format))
 
         logger.info('\n\tMSA file: {0}'
             '\n\tReference sequence file: {1}'
