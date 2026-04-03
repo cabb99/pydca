@@ -113,7 +113,7 @@ class PlmDCA:
     
     @fields_and_couplings.setter
     def fields_and_couplings(self,value):
-        assert value is np.array
+        assert isinstance(value, np.ndarray)
         q = self.__num_site_states
         L = self.__seqs_len 
         assert len(value) == L*(L-1)//2*q*q+L*q

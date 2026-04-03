@@ -1,13 +1,13 @@
 from pydca.fasta_reader import fasta_reader
 from . import scoring_matrix
 try:
-    from Bio import pairwise2
-    from Bio.SubsMat.MatrixInfo import blosum62
-    _USE_PAIRWISE2 = True
-except ImportError:
     from Bio.Align import PairwiseAligner, substitution_matrices
     blosum62 = substitution_matrices.load("BLOSUM62")
     _USE_PAIRWISE2 = False
+except ImportError:
+    from Bio import pairwise2
+    from Bio.SubsMat.MatrixInfo import blosum62
+    _USE_PAIRWISE2 = True
 import logging
 import os
 
@@ -15,9 +15,9 @@ import os
 def _get_scoring_params(biomolecule):
     """Return (scoring_matrix, gap_open, gap_extend) for RNA or protein."""
     if biomolecule == 'RNA':
-        if _USE_PAIRWISE2:
-            return scoring_matrix.NUC44, -8, 0
-        return scoring_matrix.NUC44_ARRAY, -8, 0
+        if not _USE_PAIRWISE2:
+            return scoring_matrix.NUC44_ARRAY, -8, 0
+        return scoring_matrix.NUC44, -8, 0
     elif biomolecule == 'PROTEIN':
         return blosum62, -10, -1
     raise ValueError("Unknown biomolecule type: {!r}".format(biomolecule))

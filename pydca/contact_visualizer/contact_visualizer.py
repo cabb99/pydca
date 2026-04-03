@@ -2,11 +2,10 @@ import matplotlib.pyplot as plt
 import Bio.PDB as biopdb
 import Bio.SeqIO
 try:
-    from Bio.SubsMat.MatrixInfo import blosum62
-    from Bio import pairwise2
-except ImportError:
     from Bio.Align import substitution_matrices
     blosum62 = substitution_matrices.load("BLOSUM62")
+except ImportError:
+    from Bio.SubsMat.MatrixInfo import blosum62
 from argparse import ArgumentParser
 import logging
 from ..sequence_backmapper import scoring_matrix
