@@ -16,7 +16,7 @@ if command -v python3 &> /dev/null; then
 	else
 		echo "Python 3 version found: ${PYTHON_VERSION}"
 		echo 'installing pydca'
-		pip install pydca
+		pip install -e .
 	fi
 else 
 	echo 'You need Python 3 version 3.5 or later to install pydca'
